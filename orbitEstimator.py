@@ -17,23 +17,26 @@ phi = np.deg2rad(0) #[deg] Flight path angle - 0 due to circular orbit or apogee
 beta = np.deg2rad(90) #[deg] Launch azimuth (measured from north and clockwise)
 
 #Launch site
-Lat = -45 #[deg] Latitude of launch site
+Lat = -41 #[deg] Latitude of launch site
+Lon = -63 #[deg] Longitude of launch site
 RL = Re #Earth radius at launch site
 
 #Rocket constants
+PL = 18800 #Payload mass
+
 Isp1 = 297.5 #[s] Falcon 9 first stage average
-m01 = 22800 + (25600+395700) +  (3900+92670) #[kg] Initial mass - (Payload + (Dry+Propellant)_s1 + (Dry+Propellant)_s2)
-mf1 = 22800 + (25600+0) +  (3900+92670) #[kg] Final mass (mass at burnout)
+m01 = PL + (25600+395700) +  (3900+92670) #[kg] Initial mass - (Payload + (Dry+Propellant)_s1 + (Dry+Propellant)_s2)
+mf1 = PL + (25600+0) +  (3900+92670) #[kg] Final mass (mass at burnout)
 
 Isp2 = 315.5 #[s] Falcon 9 second
-m02 = 22800 + (0+0) +  (3900+92670) #[kg] Initial mass 
-mf2 = 22800 + (0+0) +  (3900+0)   #[kg] Final mass (mass at burnout)
+m02 = PL + (0+0) +  (3900+92670) #[kg] Initial mass 
+mf2 = PL + (0+0) +  (3900+0)   #[kg] Final mass (mass at burnout)
 
 
 ############### Equations ###############
-DeltaVD = Isp1*g0*np.log(m01/mf1)+Isp2*g0*np.log(m02/mf2) #Designed DeltaV [m/s]
+DeltaVD = Isp1*g0*np.log(m01/mf1)+Isp2*g0*np.log(m02/mf2) #[m/s] Designed DeltaV 
 
-DeltaVN = DeltaVD - DeltaVL #DeltaV available to get to orbit (DeltaV needed)
+DeltaVN = DeltaVD/1000 - DeltaVL #[km/s] DeltaV available to get to orbit (DeltaV needed)
 
 #DeltaVN is a vectorial composition of the DeltaV needed to reach certain altitude plus the velocity at burnout and minus the velocity at launch site 
 #DeltaVN = DeltaVPE + DeltaVBurnout - DeltaVLaunch_site
@@ -47,7 +50,17 @@ vecBurnout = np.array([-np.cos(phi)*np.cos(beta),np.cos(phi)*np.sin(beta),np.sin
 
 func =  lambda DeltaVBurnout: ((DeltaVBurnout*vecBurnout[0])**2+(DeltaVBurnout*vecBurnout[1]-DeltaVLaunch_site)**2+(DeltaVPE+DeltaVBurnout*vecBurnout[2])**2) - DeltaVN**2
 
-root = fsolve(func,5000)[0] #Find velocity at burnout
+vBurnout = fsolve(func,5000)[0] #Find velocity at burnout
 
 
-############### SEZ TO ECI ###############
+############### Orbital parameters ###############
+
+epsilon = vBurnout**2/2 - muEarth/RBurnout #[km^2/s^2] Specific mechanical energy
+
+a = -muEarth/(2*epsilon) #[km] semimajor axis
+
+Ra = 2*a-RBurnout #[km] Apogee radius
+
+e = (Ra-RBurnout)/(Ra+RBurnout) #[-] Eccentricity
+
+print(DeltaVD/1000,vBurnout,epsilon,a,Ra,e)
