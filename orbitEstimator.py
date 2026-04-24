@@ -11,14 +11,14 @@ omegaEarth = 2*np.pi/seg #Earth angular velocity
 g0 = 9.81 #[m/s^2] Earth gravity at sea level
 
 #Assumptions
-DeltaVL = 1.5 #[km/s] DeltaV due to losses
+DeltaVL = 1 #[km/s] DeltaV due to losses
 RBurnout = 600 + Re #[km] Rocket position radius measured from Earth center
 phi = np.deg2rad(0) #[deg] Flight path angle - 0 due to circular orbit or apogee o perigee
-beta = np.deg2rad(90) #[deg] Launch azimuth (measured from north and clockwise)
+beta = np.deg2rad(90+0) #[deg] Launch azimuth (measured from north and clockwise)
 
 #Launch site
-Lat = -41 #[deg] Latitude of launch site
-Lon = -63 #[deg] Longitude of launch site
+Lat = np.deg2rad(-41) #[deg] Latitude of launch site
+Lon = np.deg2rad(-63) #[deg] Longitude of launch site
 RL = Re #Earth radius at launch site
 
 #Rocket constants
@@ -44,7 +44,7 @@ DeltaVN = DeltaVD/1000 - DeltaVL #[km/s] DeltaV available to get to orbit (Delta
 DeltaVPE = ((2*muEarth*(RBurnout-RL))/(RL*RBurnout))**(0.5) #DeltaV due to change in altitude
 
 #Launch due east
-DeltaVLaunch_site = omegaEarth*(Re*np.cos(np.deg2rad(Lat))) #DeltaV due to Earth rotation
+DeltaVLaunch_site = omegaEarth*(Re*np.cos(Lat)) #DeltaV due to Earth rotation
 
 vecBurnout = np.array([-np.cos(phi)*np.cos(beta),np.cos(phi)*np.sin(beta),np.sin(phi)]) #Velocity vector direction at burnout
 
@@ -63,4 +63,13 @@ Ra = 2*a-RBurnout #[km] Apogee radius
 
 e = (Ra-RBurnout)/(Ra+RBurnout) #[-] Eccentricity
 
-print(DeltaVD/1000,vBurnout,epsilon,a,Ra,e)
+if Lat < 0:
+    i = -np.acos(np.sin(beta)*np.cos(Lat)) #[rad] inclination
+else:
+    i = np.acos(np.sin(beta)*np.cos(Lat)) #[rad] inclination
+
+if e>=0:
+    print("Orbit has been reached with the following parameters: \n Burnout velocity = %.3f [km/s] \n Eccentricity = %.3f [-] \n Perigee radius = %.3f [km] \n Apogee radius = %.3f [km] \n Inclination = %.3f [deg]" %(vBurnout,e,RBurnout,Ra,np.rad2deg(i)))
+
+else:
+    print("Orbit hasn't been reached (e = %.3f), try reducing payload mass" %(e))
