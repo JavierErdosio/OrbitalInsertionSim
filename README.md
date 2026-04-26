@@ -50,7 +50,7 @@ Results validation has been made using Example 13.3 from the book "Orbital Mecha
 ![alt text](assets/MassVsTime.jpg)
 
 ### Speed vs time
-![alt text](assets/MassVsTime.jpg)
+![alt text](assets/SpeedVsTime.jpg)
 
 ### Flight path angle vs time
 ![alt text](assets/FPAVsTime.jpg)
