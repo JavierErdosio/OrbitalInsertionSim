@@ -6,7 +6,7 @@ g0 = 9.81 #[m/s^2]
 rho0 = 1.225 #kg/m^3
 
 
-def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,gamma0,tf,steps,term):  #Initial mass [kg], Mass at burnout [kg], Thrust [N], ISP [s] , Altitude to start performing gravity turn [m], rocket diameter [m], Drag coefficient [-], Initial flight path angle [deg], Final simultation tife [] 
+def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,v0,phi0,x0,h0,tf,steps,term):  #Initial mass [kg], Mass at burnout [kg], Thrust [N], ISP [s] , Altitude to start performing gravity turn [m], rocket diameter [m], Drag coefficient [-], Initial flight path angle [deg], Final simultation tife [] 
     def func(t,y):
 
         v,phi,x,h,m = y[0],y[1],y[2],y[3],y[4]    
@@ -51,9 +51,9 @@ def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,gamma0,tf,steps,term):  #Initial 
     
     outOfProp.terminal = term
 
-
+    y0 = [v0,phi0,x0,h0,m0] #v0,phi0,x0,h0,m0
     sol = solve_ivp(func,[0,tf],
-                    [0,np.deg2rad(gamma0),0,0,m0]
+                    y0
                     ,method='DOP853' #Explicit Runge-Kutta method of order 8.
                     ,rtol=1e-8
                     ,atol=1e-10
