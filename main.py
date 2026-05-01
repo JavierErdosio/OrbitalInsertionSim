@@ -4,20 +4,27 @@ import matplotlib.pyplot as plt
 from eqMotionSolver import eqMotion
 
 hturn = 130
-d = 5
+d = 3.7
 CD = 0.5
-phi0 = 89.85
+phi0 = 89.4
 
-tf = 260
+tf = 300
 step = 10000
 term = True #Terminate integration on burnout (True) or coast after burnout (False) 
 
+PL = 18800
 
 stages = {"stage1":{ 
-            "m0": 68000,
-            "mf": 9714,
-            "Thrust": 933912,
-            "ISP": 390
+            "m0": PL + (25600+395700) +  (3900+92670),
+            "mf": PL + (25600+0) +  (3900+92670),
+            "Thrust": 8000e3,
+            "ISP": 297.5
+            },
+            "stage2":{ 
+            "m0": PL + (0+0) +  (3900+92670),
+            "mf": PL + (0+0) +  (3900+0),
+            "Thrust": 981e3,
+            "ISP": 315.5
             }
           }
 
@@ -28,10 +35,16 @@ xComplete = np.array([0])
 hComplete = np.array([0])
 massComplete = np.array([stages["stage1"]["m0"]])
 
+tEvents = {}
+yEvents = {}
+
 for i in stages:
     sol = eqMotion(stages[i]["m0"],stages[i]["mf"],stages[i]["Thrust"],stages[i]["ISP"],hturn,d,CD,vComplete[-1],phiComplete[-1],xComplete[-1],hComplete[-1],tf,step,term)
     
-    tComplete=np.concatenate((tComplete,sol.t))
+    tEvents[i] = sol.t_events+tComplete[-1]
+    yEvents[i] = sol.y_events
+
+    tComplete=np.concatenate((tComplete,tComplete[-1]+sol.t))
     vComplete=np.concatenate((vComplete,sol.y[0]))
     phiComplete=np.concatenate((phiComplete,sol.y[1]))
     xComplete=np.concatenate((xComplete,sol.y[2]))
@@ -46,7 +59,10 @@ for i in stages:
 mvst = plt.figure(num="Mass [kg] vs time [s]")
 mvstp = mvst.add_subplot()
 mvstp.plot(tComplete,massComplete)
+for i in tEvents:
+    mvstp.plot([tEvents[i][0][0],tEvents[i][0][0]],[0,yEvents[i][0][0][4]],linestyle="dashed",label=i+" Burnout: %.2f"%yEvents[i][0][0][4])
 mvstp.grid()
+mvstp.legend()
 mvst.supxlabel("Time [s]")
 mvst.supylabel("Mass [kg]")
 mvst.suptitle("Mass [kg] vs time [s]")
@@ -56,7 +72,10 @@ mvst.suptitle("Mass [kg] vs time [s]")
 vvst = plt.figure(num="Speed [km/s] vs time [s]")
 vvstp = vvst.add_subplot()
 vvstp.plot(tComplete,vComplete/1000)
+for i in tEvents:
+    vvstp.plot([tEvents[i][0][0],tEvents[i][0][0]],[0,yEvents[i][0][0][0]/1000],linestyle="dashed",label=i+" Burnout: %.2f"%(yEvents[i][0][0][0]/1000))
 vvstp.grid()
+vvstp.legend()
 vvst.supxlabel("Time [s]")
 vvst.supylabel("Speed [km/s]")
 vvst.suptitle("Speed [km/s] vs time [s]")
@@ -65,7 +84,10 @@ vvst.suptitle("Speed [km/s] vs time [s]")
 xvsh = plt.figure(num="Altitude [km] vs downrange [km]")
 xvshp = xvsh.add_subplot()
 xvshp.plot(xComplete/1000,hComplete/1000)
+for i in tEvents:
+    xvshp.plot([yEvents[i][0][0][2]/1000,yEvents[i][0][0][2]/1000],[0,yEvents[i][0][0][3]/1000],linestyle="dashed",label=i+" Burnout. h = %.2f" %(yEvents[i][0][0][3]/1000))
 xvshp.grid()
+xvshp.legend()
 xvsh.supxlabel("Downrange [km]")
 xvsh.supylabel("Altitude [km]")
 xvsh.suptitle("Altitude [km] vs downrange [km]")
@@ -74,7 +96,10 @@ xvsh.suptitle("Altitude [km] vs downrange [km]")
 phivst = plt.figure(num="Flight path angle [deg] vs time [s]")
 phivstp = phivst.add_subplot()
 phivstp.plot(tComplete,np.rad2deg(phiComplete))
+for i in tEvents:
+    phivstp.plot([tEvents[i][0][0],tEvents[i][0][0]],[0,np.rad2deg(yEvents[i][0][0][1])],linestyle="dashed",label=i+" Burnout: %.2f" %np.rad2deg(yEvents[i][0][0][1]))
 phivstp.grid()
+phivstp.legend()
 phivst.supxlabel("Time [s]")
 phivst.supylabel("Flight path angle [deg]")
 phivst.suptitle("Flight path angle [deg] vs time [s]")
