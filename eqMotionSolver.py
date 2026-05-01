@@ -6,7 +6,7 @@ g0 = 9.81 #[m/s^2]
 rho0 = 1.225 #kg/m^3
 
 
-def eqMotion(m0,mburnout,hturn,d,CD,gamma0,tf,steps,term):  #Initial mass [kg], Mass at burnout [kg], Altitude to start performing gravity turn [m], rocket diameter [m], Drag coefficient [-], Initial flight path angle [deg], Final simultation tife [] 
+def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,gamma0,tf,steps,term):  #Initial mass [kg], Mass at burnout [kg], Thrust [N], ISP [s] , Altitude to start performing gravity turn [m], rocket diameter [m], Drag coefficient [-], Initial flight path angle [deg], Final simultation tife [] 
     def func(t,y):
 
         v,phi,x,h,m = y[0],y[1],y[2],y[3],y[4]    
@@ -18,8 +18,7 @@ def eqMotion(m0,mburnout,hturn,d,CD,gamma0,tf,steps,term):  #Initial mass [kg], 
             dotm = 0
         
         else:
-            T = 1.4 * m0 * g0 #[N] Thrust
-            Isp = 390 #[s]
+            T = Thrust #[N] Thrust
             dotm = -T/(Isp*g0) #Mass flow rate
 
         rho=rho0*np.exp(-h/7500) #[kg/m^3] Density

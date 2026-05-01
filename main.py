@@ -5,6 +5,8 @@ from eqMotionSolver import eqMotion
 
 m0 = 68000
 mf = 9714
+Thrust = 1.4*m0*9.81
+ISP = 390
 hturn = 130
 d = 5
 CD = 0.5
@@ -14,7 +16,7 @@ tf = 260
 step = 10000
 term = True #Terminate integration on burnout (True) or coast after burnout (False) 
 
-sol = eqMotion(m0,mf,hturn,d,CD,gamma0,tf,step,term)
+sol = eqMotion(m0,mf,Thrust,ISP,hturn,d,CD,gamma0,tf,step,term)
 
 print(sol)
 
