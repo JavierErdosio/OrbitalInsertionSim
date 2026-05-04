@@ -3,31 +3,36 @@ import matplotlib.pyplot as plt
 
 from eqMotionSolver import eqMotion
 
-hturn = 130
-d = 3.7
-CD = 0.5
-phi0 = 89.4
 
-tf = 300
-step = 10000
-term = True #Terminate integration on burnout (True) or coast after burnout (False) 
+################# DATA ######################
 
-PL = 18800
+hturn = 130    # Altitude to start performing gravity turn
+d = 3.7        # Rocket diameter
+CD = 0.5       # Drag coefficient
+phi0 = 89.4    #Initial flight path angle
+
+tf = 300       #Maximum simulation time per stage
+step = 10000   #Number of steps per stage
+term = True    #Terminate integration on burnout (True) or coast after burnout (False) 
+
+PL = 18800  # Payload mass
 
 stages = {"stage1":{ 
-            "m0": PL + (25600+395700) +  (3900+92670),
-            "mf": PL + (25600+0) +  (3900+92670),
+            "m0": PL + (25600+395700) +  (3900+92670), #Payload + (First stage structural + First stage propellant) + (Second stage structural + Second stage propellant)
+            "mf": PL + (25600+0) +  (3900+92670),      #Payload + (First stage structural +            0          ) + (Second stage structural + Second stage propellant)
             "Thrust": 8000e3,
             "ISP": 297.5
             },
             "stage2":{ 
-            "m0": PL + (0+0) +  (3900+92670),
-            "mf": PL + (0+0) +  (3900+0),
+            "m0": PL + (0+0) +  (3900+92670),          #Payload + (          0            +            0          ) + (Second stage structural + Second stage propellant)
+            "mf": PL + (0+0) +  (3900+0),              #Payload + (          0            +            0          ) + (Second stage structural +             0          )
             "Thrust": 981e3,
             "ISP": 315.5
             }
           }
 
+
+############### SOLUTION ####################
 tComplete = np.array([0])
 vComplete = np.array([0])
 phiComplete = np.array([np.deg2rad(phi0)])
@@ -53,7 +58,7 @@ for i in stages:
 
 
 
-#Graphs
+################# Graphs ######################
 
 ## Mass vs time
 mvst = plt.figure(num="Mass [kg] vs time [s]")
