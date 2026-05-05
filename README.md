@@ -13,11 +13,11 @@ This project focuses on simulating the launch stage of different rockets in orde
 4) [Result validation](#result-validation)
 5) [Notes](#notes)
 
-## Current status (as of April 25 2026)
+## Current status (as of May 05 2026)
 The project currently includes:
 * Orbit estimator: Allowing to estimate burnout speed based on energy conservation and approximated values of losses due to drag and gravity.
 
-* Equation of motion solver: Solves de initial value problem for the equation of motion.
+* Equation of motion solver for multistage rockets: Solves the initial value problem for the equation of motion.
 
 
 ## Roadmap / Future Work
