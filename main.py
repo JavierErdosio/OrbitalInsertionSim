@@ -2,9 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 from eqMotionSolver import eqMotion
+from SEZtoECEF import SEZtoECEF
 
 
 ################# DATA ######################
+### Launch Site
+Lat = -41   # [deg] (phi)
+Lon = -63   # [deg] (theta)
+H = 0       # [km] Altitude to mean sea level
+
+### Launch parameters
+beta = 90      #[deg] Launch azimuth measured from north and clockwise (90 = east)
 
 hturn = 130    # Altitude to start performing gravity turn
 d = 3.7        # Rocket diameter
@@ -23,7 +31,7 @@ stages = {"stage1":{
             "Thrust": 8000e3,
             "ISP": 297.5
             },
-            "stage2":{ 
+          "stage2":{ 
             "m0": PL + (0+0) +  (3900+92670),          #Payload + (          0            +            0          ) + (Second stage structural + Second stage propellant)
             "mf": PL + (0+0) +  (3900+0),              #Payload + (          0            +            0          ) + (Second stage structural +             0          )
             "Thrust": 981e3,
@@ -56,7 +64,27 @@ for i in stages:
     hComplete=np.concatenate((hComplete,sol.y[3]))
     massComplete=np.concatenate((massComplete,sol.y[4]))
 
+#Downrange decomposition
+rSouth = -xComplete*np.cos(np.deg2rad(beta))
+rEast = xComplete*np.sin(np.deg2rad(beta))
 
+#Speed vector
+sinPhi = np.sin(phiComplete)
+cosPhi = np.cos(phiComplete)
+
+verticalSpeed = np.multiply(vComplete,sinPhi)
+
+horizontalSpeed = np.multiply(vComplete,cosPhi)
+
+vSouth = -horizontalSpeed*np.cos(np.deg2rad(beta))
+vEast = horizontalSpeed*np.sin(np.deg2rad(beta))
+
+
+#SEZ to ECEF
+rSEZ = np.column_stack((rSouth,rEast,hComplete))
+vSEZ = np.column_stack((vSouth,vEast,verticalSpeed))
+
+rECEF,vECEF = SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ)
 
 ################# Graphs ######################
 
