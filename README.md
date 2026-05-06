@@ -20,6 +20,8 @@ The project currently includes:
 
 * Equation of motion solver for multistage rockets: Solves the initial value problem for the equation of motion.
 
+* SEZ to ECEF convertion
+
 
 ## Roadmap / Future Work
 Planned improvements include:
@@ -30,8 +32,6 @@ Planned improvements include:
 * Use of pyvista instead of matplotlib.
 
 * Altitude and downrange to South-East-Zenith (SEZ).
-
-* SEZ to ECI.
 
 
 ## How to use
