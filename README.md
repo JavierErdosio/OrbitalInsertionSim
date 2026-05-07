@@ -14,7 +14,7 @@ This project focuses on simulating the launch stage of different rockets in orde
 5) [Result validation](#result-validation)
 6) [Notes](#notes)
 
-## Current status (as of May 05 2026)
+## Current status (as of May 07 2026)
 The project currently includes:
 * Orbit estimator: Allowing to estimate burnout speed based on energy conservation and approximated values of losses due to drag and gravity.
 
@@ -22,16 +22,13 @@ The project currently includes:
 
 * SEZ to ECEF convertion
 
+* Orbital parameters determination
+
 
 ## Roadmap / Future Work
 Planned improvements include:
-* Better implementation of atmosphere model.
-
-* Better implementation of gravity model.
 
 * Use of pyvista instead of matplotlib.
-
-* Altitude and downrange to South-East-Zenith (SEZ).
 
 
 ## How to use
