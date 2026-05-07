@@ -10,27 +10,25 @@ This project focuses on simulating the launch stage of different rockets in orde
 1) [Current Status](#current-status-as-of-april-25-2026)
 2) [Roadmap / Future Work](#roadmap--future-work)
 3) [How to use](#how-to-use)
-4) [Result validation](#result-validation)
-5) [Notes](#notes)
+4) [Multistage example](#multistage-example)
+5) [Result validation](#result-validation)
+6) [Notes](#notes)
 
-## Current status (as of April 25 2026)
+## Current status (as of May 07 2026)
 The project currently includes:
 * Orbit estimator: Allowing to estimate burnout speed based on energy conservation and approximated values of losses due to drag and gravity.
 
-* Equation of motion solver: Solves de initial value problem for the equation of motion.
+* Equation of motion solver for multistage rockets: Solves the initial value problem for the equation of motion.
+
+* SEZ to ECEF convertion
+
+* Orbital parameters determination
 
 
 ## Roadmap / Future Work
 Planned improvements include:
-* Better implementation of atmosphere model.
-
-* Better implementation of gravity model.
 
 * Use of pyvista instead of matplotlib.
-
-* Altitude and downrange to South-East-Zenith (SEZ).
-
-* SEZ to ECI.
 
 
 ## How to use
@@ -39,12 +37,11 @@ Planned improvements include:
 pip install numpy scipy matplotlib
 ```
 
-2) Modify script with your rocket parameters
+2) Modify `main.py` script with your rocket parameters
 
-3) Execute
+3) Execute `main.py`
 
-## Result validation
-Results validation has been made using Example 13.3 from the book "Orbital Mechanics for Engineering Students". Results can be seen on the graphics below.
+## Multistage example
 
 ### Mass vs time
 ![alt text](assets/MassVsTime.jpg)
@@ -58,6 +55,8 @@ Results validation has been made using Example 13.3 from the book "Orbital Mecha
 ### Range vs altitude
 ![alt text](assets/RangeVsAltitude.jpg)
 
+## Result validation
+Results validation has been made using Example 13.3 from the book "Orbital Mechanics for Engineering Students".
 
 ## Notes
 

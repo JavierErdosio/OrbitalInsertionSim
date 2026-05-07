@@ -1,107 +1,65 @@
 import numpy as np
 from scipy.integrate import solve_ivp
-import matplotlib.pyplot as plt 
 
 Re = 6378*1000 #[m] Earth radius
 g0 = 9.81 #[m/s^2]
 rho0 = 1.225 #kg/m^3
-m0 = 68000 #[kg] initial mass
 
-def func(t,y):
 
-    v,phi,x,h,m = y[0],y[1],y[2],y[3],y[4]    
+def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,v0,phi0,x0,h0,tf,steps,term):  #Initial mass [kg], Mass at burnout [kg], Thrust [N], ISP [s] , Altitude to start performing gravity turn [m], rocket diameter [m], Drag coefficient [-], Initial flight path angle [deg], Final simultation tife [] 
+    def func(t,y):
 
-    g = g0/(1+h/Re)**2 #[m/s^2] Gravity
+        v,phi,x,h,m = y[0],y[1],y[2],y[3],y[4]    
 
-    mburnout = 9714 #[kg] Mass at burnout 
+        g = g0/(1+h/Re)**2 #[m/s^2] Gravity
 
-    if m <= mburnout: 
-        T= 0
-        dotm = 0
-    
-    else:
-        T = 1.4 * m0 * g0 #[N] Thrust
-        Isp = 390 #[s]
-        dotm = -T/(Isp*g0) #Mass flow rate
-
-    rho=rho0*np.exp(-h/7500) #[kg/m^3] Density
-    
-    d = 5 #[m]
-    A = np.pi*d**2/4 #[m^2] Frontal area
-
-    CD = 0.5 #[-] Drag coefficient
-
-    D = 0.5*rho*v**2*A*CD #[N] Drag force
-
-    hturn = 130 #[m] Altitude to start performing gravity turn
-
-    if h <= hturn:
-        dotphi = 0 #[rad/s] Variation of flight path angle
-        dotv = T/m-D/m-g #[m/s^2] Acceleration
-        dotx = 0 #[m/s] Horizontal speed
-        doth = v #[m/s] Vertical speed
-    
-    else:
-        if v < 1e-3:
-            dotphi = 0 #[rad/s] Variation of flight path angle
+        if m <= mburnout: 
+            T= 0
+            dotm = 0
+        
         else:
-            dotphi = -(1/v) * (g-v**2/(Re+h))*np.cos(phi) #[rad/s] Variation of flight path angle
+            T = Thrust #[N] Thrust
+            dotm = -T/(Isp*g0) #Mass flow rate
 
-        dotv = T/m-D/m-g*np.sin(phi) #[m/s^2] Acceleration
-        dotx = (Re/(Re+h))*v*np.cos(phi) #[m/s] Horizontal speed
-        doth = v*np.sin(phi) #[m/s] Vertical speed
- 
+        rho=rho0*np.exp(-h/7500) #[kg/m^3] Density
+        
+        A = np.pi*d**2/4 #[m^2] Frontal area
 
-    return dotv,dotphi,dotx,doth,dotm
+        D = 0.5*rho*v**2*A*CD #[N] Drag force
 
+        if h <= hturn:
+            dotphi = 0 #[rad/s] Variation of flight path angle
+            dotv = T/m-D/m-g #[m/s^2] Acceleration
+            dotx = 0 #[m/s] Horizontal speed
+            doth = v #[m/s] Vertical speed
+        
+        else:
+            if v < 1e-3:
+                dotphi = 0 #[rad/s] Variation of flight path angle
+            else:
+                dotphi = -(1/v) * (g-v**2/(Re+h))*np.cos(phi) #[rad/s] Variation of flight path angle
 
+            dotv = T/m-D/m-g*np.sin(phi) #[m/s^2] Acceleration
+            dotx = (Re/(Re+h))*v*np.cos(phi) #[m/s] Horizontal speed
+            doth = v*np.sin(phi) #[m/s] Vertical speed
+    
 
-sol = solve_ivp(func,[0,260],
-                [0,np.deg2rad(89.85),0,0,m0]
-                ,method='DOP853' #Explicit Runge-Kutta method of order 8.
-                ,rtol=1e-8
-                ,atol=1e-10
-                ,t_eval=np.arange(0,260,step=260/10000)
-                )
+        return dotv,dotphi,dotx,doth,dotm
 
-#Graphs
+    def outOfProp(t,y):
+        return y[4]-mburnout
+    
+    outOfProp.terminal = term
 
-## Mass vs time
-mvst = plt.figure(num="Mass [kg] vs time [s]")
-mvstp = mvst.add_subplot()
-mvstp.plot(sol.t,sol.y[4])
-mvstp.grid()
-mvst.supxlabel("Time [s]")
-mvst.supylabel("Mass [kg]")
-mvst.suptitle("Mass [kg] vs time [s]")
+    y0 = [v0,phi0,x0,h0,m0] #v0,phi0,x0,h0,m0
+    sol = solve_ivp(func,[0,tf],
+                    y0
+                    ,method='DOP853' #Explicit Runge-Kutta method of order 8.
+                    ,rtol=1e-8
+                    ,atol=1e-10
+                    ,t_eval=np.arange(0,tf,step=tf/steps)
+                    ,events=outOfProp
+                    )
+    
+    return sol
 
-
-## Speed vs time
-vvst = plt.figure(num="Speed [km/s] vs time [s]")
-vvstp = vvst.add_subplot()
-vvstp.plot(sol.t,sol.y[0]/1000)
-vvstp.grid()
-vvst.supxlabel("Time [s]")
-vvst.supylabel("Speed [km/s]")
-vvst.suptitle("Speed [km/s] vs time [s]")
-
-## Altitude vs downrange
-xvsh = plt.figure(num="Altitude [km] vs downrange [km]")
-xvshp = xvsh.add_subplot()
-xvshp.plot(sol.y[2]/1000,sol.y[3]/1000)
-xvshp.grid()
-xvsh.supxlabel("Downrange [km]")
-xvsh.supylabel("Altitude [km]")
-xvsh.suptitle("Altitude [km] vs downrange [km]")
-
-## Flight path angle [deg] vs time [s]
-phivst = plt.figure(num="Flight path angle [deg] vs time [s]")
-phivstp = phivst.add_subplot()
-phivstp.plot(sol.t,np.rad2deg(sol.y[1]))
-phivstp.grid()
-phivst.supxlabel("Time [s]")
-phivst.supylabel("Flight path angle [deg]")
-phivst.suptitle("Flight path angle [deg] vs time [s]")
-
-
-plt.show()
