@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from eqMotionSolver import eqMotion
 from SEZtoECEF import SEZtoECEF
+from orbitalParams import orbitalParams
 
 
 ################# DATA ######################
@@ -85,6 +86,21 @@ rSEZ = np.column_stack((rSouth,rEast,hComplete))
 vSEZ = np.column_stack((vSouth,vEast,verticalSpeed))
 
 rECEF,vECEF = SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ)
+
+#Orbital parameters at final burnout
+r,v,Rp,Ra,h,inc,omega,RAAN,theta,e = orbitalParams(rECEF[-1]/1000,vECEF[-1]/1000)
+print(
+    "Distance to center:    %.3f [km] \n" \
+    "Current speed:         %.3f [km/s] \n" \
+    "Periapsis radius:     %.3f [km] \n" \
+    "Apoapsis radius:      %.3f [km] \n" \
+    "Angular momentum:      %.3f [km^2/s] \n" \
+    "Inclination:           %.3f [deg] \n" \
+    "Argument of periapsis: %.3f [deg] \n" \
+    "RAAN:                  %.3f [deg] \n" \
+    "True anomaly:          %.3f [deg] \n" \
+    "Eccentricity:          %.3f [-]" %(r,v,Rp,Ra,h,inc,omega,RAAN,theta,e)
+)
 
 ################# Graphs ######################
 
