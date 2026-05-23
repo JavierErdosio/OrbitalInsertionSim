@@ -22,13 +22,13 @@ Lon = np.deg2rad(-63) #[deg] Longitude of launch site
 RL = Re #Earth radius at launch site
 
 #Rocket constants
-PL = 18800 #Payload mass
+PL = 22800 #Payload mass
 
 Isp1 = 297.5 #[s] Falcon 9 first stage average
 m01 = PL + (25600+395700) +  (3900+92670) #[kg] Initial mass - (Payload + (Dry+Propellant)_s1 + (Dry+Propellant)_s2)
 mf1 = PL + (25600+0) +  (3900+92670) #[kg] Final mass (mass at burnout)
 
-Isp2 = 315.5 #[s] Falcon 9 second
+Isp2 = 348 #[s] Falcon 9 second
 m02 = PL + (0+0) +  (3900+92670) #[kg] Initial mass 
 mf2 = PL + (0+0) +  (3900+0)   #[kg] Final mass (mass at burnout)
 
