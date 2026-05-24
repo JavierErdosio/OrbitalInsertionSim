@@ -12,7 +12,7 @@ g0 = 9.81 #[m/s^2] Earth gravity at sea level
 
 #Assumptions
 DeltaVL = 1 #[km/s] DeltaV due to losses
-RBurnout = 600 + Re #[km] Rocket position radius measured from Earth center
+RBurnout = 550 + Re #[km] Rocket position radius measured from Earth center
 phi = np.deg2rad(0) #[deg] Flight path angle - 0 due to circular orbit or apogee o perigee
 beta = np.deg2rad(90+0) #[deg] Launch azimuth (measured from north and clockwise)
 
@@ -22,15 +22,15 @@ Lon = np.deg2rad(-80.57) #[deg] Longitude of launch site
 RL = Re #Earth radius at launch site
 
 #Rocket constants
-PL = 22800 #Payload mass
+PL = 20720 #Payload mass
 
 Isp1 = 297.5 #[s] Falcon 9 first stage average
 m01 = PL + (25600+395700) +  (3900+92670) #[kg] Initial mass - (Payload + (Dry+Propellant)_s1 + (Dry+Propellant)_s2)
-mf1 = PL + (25600+0) +  (3900+92670) #[kg] Final mass (mass at burnout)
+mf1 = PL + (25600+25700) +  (3900+92670) #[kg] Final mass (mass at burnout)
 
 Isp2 = 348 #[s] Falcon 9 second
 m02 = PL + (0+0) +  (3900+92670) #[kg] Initial mass 
-mf2 = PL + (0+0) +  (3900+0)   #[kg] Final mass (mass at burnout)
+mf2 = PL + (0+0) +  (2900+0)   #[kg] Final mass (mass at burnout)
 
 
 ############### Equations ###############
