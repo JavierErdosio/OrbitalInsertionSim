@@ -17,8 +17,8 @@ phi = np.deg2rad(0) #[deg] Flight path angle - 0 due to circular orbit or apogee
 beta = np.deg2rad(90+0) #[deg] Launch azimuth (measured from north and clockwise)
 
 #Launch site
-Lat = np.deg2rad(-41) #[deg] Latitude of launch site
-Lon = np.deg2rad(-63) #[deg] Longitude of launch site
+Lat = np.deg2rad(28.5) #[deg] Latitude of launch site
+Lon = np.deg2rad(-80.57) #[deg] Longitude of launch site
 RL = Re #Earth radius at launch site
 
 #Rocket constants
@@ -50,7 +50,7 @@ vecBurnout = np.array([-np.cos(phi)*np.cos(beta),np.cos(phi)*np.sin(beta),np.sin
 
 func =  lambda DeltaVBurnout: ((DeltaVBurnout*vecBurnout[0])**2+(DeltaVBurnout*vecBurnout[1]-DeltaVLaunch_site)**2+(DeltaVPE+DeltaVBurnout*vecBurnout[2])**2) - DeltaVN**2
 
-vBurnout = fsolve(func,5000)[0] #Find velocity at burnout
+vBurnout = fsolve(func,5)[0] #Find velocity at burnout
 
 
 ############### Orbital parameters ###############
