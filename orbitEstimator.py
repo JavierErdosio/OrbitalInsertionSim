@@ -14,7 +14,7 @@ g0 = 9.81 #[m/s^2] Earth gravity at sea level
 DeltaVL = 1 #[km/s] DeltaV due to losses
 RBurnout = 550 + Re #[km] Rocket position radius measured from Earth center
 phi = np.deg2rad(0) #[deg] Flight path angle - 0 due to circular orbit or apogee o perigee
-beta = np.deg2rad(90+0) #[deg] Launch azimuth (measured from north and clockwise)
+beta = np.deg2rad(45) #[deg] Launch azimuth (measured from north and clockwise)
 
 #Launch site
 Lat = np.deg2rad(28.5) #[deg] Latitude of launch site
@@ -22,19 +22,23 @@ Lon = np.deg2rad(-80.57) #[deg] Longitude of launch site
 RL = Re #Earth radius at launch site
 
 #Rocket constants
-PL = 20720 #Payload mass
+PL = 28*800 #Payload mass
 
-Isp1 = 297.5 #[s] Falcon 9 first stage average
+Isp1 = 300 #[s] Falcon 9 first stage average
 m01 = PL + (25600+395700) +  (3900+92670) #[kg] Initial mass - (Payload + (Dry+Propellant)_s1 + (Dry+Propellant)_s2)
-mf1 = PL + (25600+25700) +  (3900+92670) #[kg] Final mass (mass at burnout)
+mf1 = PL + (25600+25700) +  (3900+92670) #[kg] Final mass (mass at stage 1 burnout)
 
 Isp2 = 348 #[s] Falcon 9 second
 m02 = PL + (0+0) +  (3900+92670) #[kg] Initial mass 
-mf2 = PL + (0+0) +  (2900+0)   #[kg] Final mass (mass at burnout)
+mf2 = PL + (0+0) +  (3900+85000) #[kg] Final mass (mass at fairing deployment)
+
+Isp21 = 348 #[s] Falcon 9 second
+m021 = PL + (0+0) +  (2900+85000) #[kg] Initial mass 
+mf21 = PL + (0+0) +  (2900+1200)   #[kg] Final mass (mass at stage 2 burnout)
 
 
 ############### Equations ###############
-DeltaVD = Isp1*g0*np.log(m01/mf1)+Isp2*g0*np.log(m02/mf2) #[m/s] Designed DeltaV 
+DeltaVD = Isp1*g0*np.log(m01/mf1)+Isp2*g0*np.log(m02/mf2)+Isp21*g0*np.log(m021/mf21) #[m/s] Designed DeltaV 
 
 DeltaVN = DeltaVD/1000 - DeltaVL #[km/s] DeltaV available to get to orbit (DeltaV needed)
 
@@ -61,15 +65,19 @@ a = -muEarth/(2*epsilon) #[km] semimajor axis
 
 Ra = 2*a-RBurnout #[km] Apogee radius
 
-e = (Ra-RBurnout)/(Ra+RBurnout) #[-] Eccentricity
+if Ra < RBurnout:
+    Rap = RBurnout
+    Rpe = Ra
+
+else:
+    Rap = Ra
+    Rpe = RBurnout
+
+e = (Rap-Rpe)/(Rap+Rpe) #[-] Eccentricity
 
 if Lat < 0:
     i = -np.acos(np.sin(beta)*np.cos(Lat)) #[rad] inclination
 else:
     i = np.acos(np.sin(beta)*np.cos(Lat)) #[rad] inclination
 
-if e>=0:
-    print("Orbit has been reached with the following parameters: \n Burnout velocity = %.3f [km/s] \n Eccentricity = %.3f [-] \n Perigee radius = %.3f [km] \n Apogee radius = %.3f [km] \n Inclination = %.3f [deg]" %(vBurnout,e,RBurnout,Ra,np.rad2deg(i)))
-
-else:
-    print("Orbit hasn't been reached (e = %.3f), try reducing payload mass" %(e))
+print("Orbit has the following parameters: \n Burnout velocity = %.3f [km/s] \n Eccentricity = %.3f [-] \n Perigee radius = %.3f [km] \n Apogee radius = %.3f [km] \n Inclination = %.3f [deg]" %(vBurnout,e,Rpe,Rap,np.rad2deg(i)))
