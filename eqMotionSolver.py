@@ -6,7 +6,7 @@ g0 = 9.81 #[m/s^2]
 rho0 = 1.225 #kg/m^3
 
 
-def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,v0,phi0,x0,h0,tf,steps,term):  #Initial mass [kg], Mass at burnout [kg], Thrust [N], ISP [s] , Altitude to start performing gravity turn [m], rocket diameter [m], Drag coefficient [-], Initial flight path angle [deg], Final simultation tife [] 
+def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,v0,phi0,x0,h0,tf,steps,term,hg,Adotphi):  #Initial mass [kg], Mass at burnout [kg], Thrust [N], ISP [s] , Altitude to start performing gravity turn [m], rocket diameter [m], Drag coefficient [-], Initial flight path angle [deg], Final simultation tife [] 
     def func(t,y):
 
         v,phi,x,h,m = y[0],y[1],y[2],y[3],y[4]    
@@ -33,11 +33,11 @@ def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,v0,phi0,x0,h0,tf,steps,term):  #I
             dotx = 0 #[m/s] Horizontal speed
             doth = v #[m/s] Vertical speed
 
-        elif h<=8200:
+        elif h<=hg:
             if v < 0.500:
                 dotphi = 0 #[rad/s] Variation of flight path angle
             else:
-                dotphi = -0.025 #[rad/s] Variation of flight path angle
+                dotphi = Adotphi #[rad/s] Active controlled variation of flight path angle
                 
             dotv = T/m-D/m-g*np.sin(phi) #[m/s^2] Acceleration
             dotx = (Re/(Re+h))*v*np.cos(phi) #[m/s] Horizontal speed

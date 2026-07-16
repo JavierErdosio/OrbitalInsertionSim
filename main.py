@@ -15,7 +15,9 @@ H = 0       # [km] Altitude to mean sea level
 ### Launch parameters
 beta = 50      #[deg] Launch azimuth measured from north and clockwise (90 = east)
 
-hturn = 3800    # Altitude to start performing gravity turn
+hturn = 3800     # Altitude to start performing active controlled variation of flight path angle
+hg = 8200        # Altitude to start performing gravity turn
+Adotphi = -0.025 # Active controlled variation of flight path angle
 d = 3.7        # Rocket diameter
 CD = 0.3       # Drag coefficient
 phi0 = 89.5    #Initial flight path angle
@@ -71,7 +73,7 @@ tEvents = {}
 yEvents = {}
 
 for i in stages:
-    sol = eqMotion(stages[i]["m0"],stages[i]["mf"],stages[i]["Thrust"],stages[i]["ISP"],hturn,d,CD,vComplete[-1],phiComplete[-1],xComplete[-1],hComplete[-1],tf,step,term)
+    sol = eqMotion(stages[i]["m0"],stages[i]["mf"],stages[i]["Thrust"],stages[i]["ISP"],hturn,d,CD,vComplete[-1],phiComplete[-1],xComplete[-1],hComplete[-1],tf,step,term,hg,Adotphi)
     
     tEvents[i] = sol.t_events+tComplete[-1]
     yEvents[i] = sol.y_events
