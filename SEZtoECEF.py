@@ -28,7 +28,7 @@ def SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ):
     Y = x0*np.sin(Lon)
     Z = z0
 
-    LaunchSitePos = [X,Y,Z]
+    LaunchSitePos = np.array([X,Y,Z])
 
     ########### SEZ to ECEF ##############
     sin_phi = np.sin(Lat)
@@ -45,5 +45,4 @@ def SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ):
     rECEF = LaunchSitePos + np.matvec(RotSEZtoECEF, rSEZ)
     vECEF = np.matvec(RotSEZtoECEF, LaunchSiteSpeedSEZ) + np.matvec(RotSEZtoECEF, vSEZ)
 
-
-    return rECEF, vECEF
+    return rECEF/1000, vECEF/1000,np.linalg.norm(LaunchSitePos)/1000

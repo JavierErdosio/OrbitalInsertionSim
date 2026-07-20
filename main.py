@@ -4,18 +4,19 @@ import matplotlib.pyplot as plt
 from eqMotionSolver import eqMotion
 from SEZtoECEF import SEZtoECEF
 from orbitalParams import orbitalParams
+from TwoBodySolver import SatPoints
 
 
 ################# DATA ######################
 ### Launch Site
-Lat = 28   # [deg] (phi)
+Lat = -28   # [deg] (phi)
 Lon = -80   # [deg] (theta)
 H = 0       # [km] Altitude to mean sea level
 
 ### Launch parameters
-beta = 50      #[deg] Launch azimuth measured from north and clockwise (90 = east)
+beta = 90      #[deg] Launch azimuth measured from north and clockwise (90 = east)
 
-hturn = 3800     # Altitude to start performing active controlled variation of flight path angle
+hturn = 3700     # Altitude to start performing active controlled variation of flight path angle
 hg = 8200        # Altitude to start performing gravity turn
 Adotphi = -0.025 # Active controlled variation of flight path angle
 d = 3.7        # Rocket diameter
@@ -27,6 +28,8 @@ step = 10000   #Number of steps per stage
 term = True    #Terminate integration on burnout (True) or coast after burnout (False) 
 
 PL = 28*800  # Payload mass
+
+test = 61200
 
 stages = {"stage1":{ 
             "m0": PL + (25600+395700) +  (3900+92670), #Payload + (First stage structural + First stage propellant) + (Second stage structural + Second stage propellant)
@@ -54,7 +57,7 @@ stages = {"stage1":{
             },
           "stage2.2":{ 
             "m0": PL + (0+0) +  (2900+92000),          #Payload + (          0            +            0          ) + (Second stage structural + Second stage propellant)
-            "mf": PL + (0+0) +  (2900+1200),              #Payload + (          0            +            0          ) + (Second stage structural +             0          )
+            "mf": PL + (0+0) +  (2900+test),              #Payload + (          0            +            0          ) + (Second stage structural +             0          )
             "Thrust": 981e3*0.94,
             "ISP": 348
             }
@@ -105,10 +108,21 @@ vEast = horizontalSpeed*np.sin(np.deg2rad(beta))
 rSEZ = np.column_stack((rSouth,rEast,hComplete))
 vSEZ = np.column_stack((vSouth,vEast,verticalSpeed))
 
-rECEF,vECEF = SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ)
+rECEF,vECEF,rLaunchSite = SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ)
+
+#Propagation
+#print(massComplete[-1])
+#print(next(reversed(stages)))
+
+rogvog = np.concatenate((rECEF[-1],vECEF[-1]))
+time,pos,vel = SatPoints(300,step,rogvog,PL+2900+test,test,981e3*.9,348)
+
+rECEFpos = np.concatenate((rECEF,pos))
+vECEFpos= np.concatenate((vECEF,vel))
+timepos = np.concatenate((tComplete,time+tComplete[-1]))
 
 #Orbital parameters at final burnout
-r,v,Rp,Ra,h,inc,omega,RAAN,theta,e = orbitalParams(rECEF[-1]/1000,vECEF[-1]/1000)
+r,v,Rp,Ra,h,inc,omega,RAAN,theta,e = orbitalParams(rECEFpos[-1],vECEFpos[-1])
 print(
     "Distance to center:    %.3f [km] \n" \
     "Current speed:         %.3f [km/s] \n" \
@@ -121,6 +135,9 @@ print(
     "True anomaly:          %.3f [deg] \n" \
     "Eccentricity:          %.3f [-]" %(r,v,Rp,Ra,h,inc,omega,RAAN,theta,e)
 )
+
+altitudeECEF = np.linalg.norm(rECEFpos,axis=1)-rLaunchSite
+velECEF = np.linalg.norm(vECEFpos,axis=1)
 
 ################# Graphs ######################
 ## True
@@ -148,7 +165,8 @@ mvst.suptitle("Mass [kg] vs time [s]")
 ## Speed vs time
 vvst = plt.figure(num="Speed [km/s] vs time [s]")
 vvstp = vvst.add_subplot()
-vvstp.plot(tComplete,vComplete/1000)
+vvstp.plot(tComplete,vComplete/1000,label="SEZ")
+vvstp.plot(timepos,velECEF,label="ECEF")
 for i in tEvents:
     vvstp.plot([tEvents[i][0][0],tEvents[i][0][0]],[0,yEvents[i][0][0][0]/1000],linestyle="dashed",label=i+" Burnout: %.2f"%(yEvents[i][0][0][0]/1000))
 vvstp.scatter(tTrue,vTrue,label="Falcon 9 16-10-2025")
@@ -162,7 +180,8 @@ vvst.suptitle("Speed [km/s] vs time [s]")
 ## Altitude vs downrange
 xvsh = plt.figure(num="Altitude [km] vs downrange [km]")
 xvshp = xvsh.add_subplot()
-xvshp.plot(xComplete/1000,hComplete/1000)
+xvshp.plot(xComplete/1000,hComplete/1000,label="SEZ")
+#xvshp.plot(xComplete/1000,altitudeECEF,label="ECEF")
 for i in tEvents:
     xvshp.plot([yEvents[i][0][0][2]/1000,yEvents[i][0][0][2]/1000],[0,yEvents[i][0][0][3]/1000],linestyle="dashed",label=i+" Burnout. h = %.2f" %(yEvents[i][0][0][3]/1000))
 xvshp.grid()
@@ -175,7 +194,8 @@ xvsh.suptitle("Altitude [km] vs downrange [km]")
 ## Altitude vs time
 tvsh = plt.figure(num="Altitude [km] vs time [s]")
 tvshp = tvsh.add_subplot()
-tvshp.plot(tComplete,hComplete/1000)
+tvshp.plot(tComplete,hComplete/1000,label="SEZ")
+tvshp.plot(timepos,altitudeECEF,label="ECEF")
 for i in tEvents:
      tvshp.plot([tEvents[i][0][0],tEvents[i][0][0]],[0,yEvents[i][0][0][3]/1000],linestyle="dashed",label=i+" Burnout: %.2f"%(yEvents[i][0][0][3]/1000))
 tvshp.scatter(tTrue,hTrue,label="Falcon 9 16-10-2025")

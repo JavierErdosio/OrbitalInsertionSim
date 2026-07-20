@@ -53,8 +53,8 @@ def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,v0,phi0,x0,h0,tf,steps,term,hg,Ad
             dotx = (Re/(Re+h))*v*np.cos(phi) #[m/s] Horizontal speed
             doth = v*np.sin(phi) #[m/s] Vertical speed
 
-        if phi<=0:
-           dotphi=0    
+        #if phi<=0:
+        #   dotphi=0    
 
         return dotv,dotphi,dotx,doth,dotm
 
