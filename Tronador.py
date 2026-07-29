@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 from eqMotionSolver import eqMotion
-from SEZtoECEF import SEZtoECEF
+from TOPtoECEF import SEZtoECEF,ENZtoECEF
 from orbitalParams import orbitalParams
 from TwoBodySolver import SatPoints
 
