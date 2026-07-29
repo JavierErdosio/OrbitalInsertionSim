@@ -1,12 +1,13 @@
 import numpy as np
 from scipy.integrate import solve_ivp
+import optuna
 
 Re = 6378*1000 #[m] Earth radius
 g0 = 9.81 #[m/s^2]
 rho0 = 1.225 #kg/m^3
 
 
-def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,v0,phi0,x0,h0,tf,steps,term,hg,Adotphi):  #Initial mass [kg], Mass at burnout [kg], Thrust [N], ISP [s] , Altitude to start performing gravity turn [m], rocket diameter [m], Drag coefficient [-], Initial flight path angle [deg], Final simultation tife [] 
+def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,v0,phi0,x0,h0,tf,steps,term,hg,Adotphi,opt=False):  #Initial mass [kg], Mass at burnout [kg], Thrust [N], ISP [s] , Altitude to start performing gravity turn [m], rocket diameter [m], Drag coefficient [-], Initial flight path angle [deg], Final simultation tife [] 
     def func(t,y):
 
         v,phi,x,h,m = y[0],y[1],y[2],y[3],y[4]    
@@ -21,7 +22,10 @@ def eqMotion(m0,mburnout,Thrust,Isp,hturn,d,CD,v0,phi0,x0,h0,tf,steps,term,hg,Ad
             T = Thrust #[N] Thrust
             dotm = -T/(Isp*g0) #Mass flow rate
 
-        rho=rho0*np.exp(-h/7500) #[kg/m^3] Density
+        if h <= 0 and opt:
+            raise optuna.TrialPruned()
+
+        rho=rho0*np.exp(np.clip(-h/7500,-700,700)) #[kg/m^3] Density
         
         A = np.pi*d**2/4 #[m^2] Frontal area
 
