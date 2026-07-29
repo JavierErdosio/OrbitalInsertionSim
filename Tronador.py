@@ -14,20 +14,20 @@ Lon = -61.71   # [deg] (theta)
 H = 0       # [km] Altitude to mean sea level
 
 ### Launch parameters
-beta = 180      #[deg] Launch azimuth measured from north and clockwise (90 = east)
+beta = 185      #[deg] Launch azimuth measured from north and clockwise (90 = east)
 
-hturn = 4000    # Altitude to start performing gravity turn
-hg = 8400
-Adotphi = -0.025 # Active controlled variation of flight path angle
+hturn = 200    # Altitude to start performing gravity turn
+hg = 2200
+Adotphi = -0.007 # Active controlled variation of flight path angle
 d = 2.5        # Rocket diameter
 CD = 0.3       # Drag coefficient
-phi0 = 89.5    #Initial flight path angle
+phi0 = 88.66    #Initial flight path angle
 
 tf = 1000       #Maximum simulation time per stage
 step = 10000   #Number of steps per stage
 term = True    #Terminate integration on burnout (True) or coast after burnout (False) 
 
-PL = 400  # Payload mass
+PL = 500  # Payload mass
 
 test = 3000
 
@@ -63,7 +63,7 @@ tComplete = np.array([0])
 vComplete = np.array([0])
 phiComplete = np.array([np.deg2rad(phi0)])
 xComplete = np.array([0])
-hComplete = np.array([0])
+hComplete = np.array([H])
 massComplete = np.array([stages["stage1"]["m0"]])
 
 tEvents = {}
@@ -109,7 +109,7 @@ rECEF,vECEF,rLaunchSite = SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ)
 #print(next(reversed(stages)))
 
 rogvog = np.concatenate((rECEF[-1],vECEF[-1]))
-time,pos,vel = SatPoints(6000,step,rogvog,PL+700+test,test,2975*9.81*.95,317)
+time,pos,vel = SatPoints(1000,step,rogvog,PL+700+test,test,2975*9.81*.88,317,"Angular",14)
 
 rECEFpos = np.concatenate((rECEF,pos))
 vECEFpos= np.concatenate((vECEF,vel))
