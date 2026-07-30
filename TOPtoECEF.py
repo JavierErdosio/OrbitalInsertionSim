@@ -42,10 +42,12 @@ def SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ):
         [-cos_phi,          0.0,     sin_phi]
         ])
 
-    rECEF = LaunchSitePos + np.matvec(RotSEZtoECEF, rSEZ)
-    vECEF = np.matvec(RotSEZtoECEF, LaunchSiteSpeedSEZ) + np.matvec(RotSEZtoECEF, vSEZ)
+    LaunchSiteSpeed = np.matvec(RotSEZtoECEF, LaunchSiteSpeedSEZ)
 
-    return rECEF/1000, vECEF/1000,np.linalg.norm(LaunchSitePos)/1000
+    rECEF = LaunchSitePos + np.matvec(RotSEZtoECEF, rSEZ)
+    vECEF = LaunchSiteSpeed + np.matvec(RotSEZtoECEF, vSEZ)
+
+    return rECEF/1000, vECEF/1000,np.linalg.norm(LaunchSitePos)/1000,LaunchSiteSpeed/1000
 
 
 def ENZtoECEF(Lat,Lon,H,rSEZ,vSEZ):
@@ -88,7 +90,9 @@ def ENZtoECEF(Lat,Lon,H,rSEZ,vSEZ):
         [ 0.0,         cos_phi,               sin_phi             ]
     ])
 
-    rECEF = LaunchSitePos + np.matvec(RotENZtoECEF, rSEZ)
-    vECEF = np.matvec(RotENZtoECEF, LaunchSiteSpeedENZ) + np.matvec(RotENZtoECEF, vSEZ)
+    LaunchSiteSpeed = np.matvec(RotENZtoECEF, LaunchSiteSpeedENZ)
 
-    return rECEF/1000, vECEF/1000,np.linalg.norm(LaunchSitePos)/1000
+    rECEF = LaunchSitePos + np.matvec(RotENZtoECEF, rSEZ)
+    vECEF = LaunchSiteSpeed + np.matvec(RotENZtoECEF, vSEZ)
+
+    return rECEF/1000, vECEF/1000,np.linalg.norm(LaunchSitePos)/1000,LaunchSiteSpeed/1000

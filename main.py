@@ -2,14 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 from eqMotionSolver import eqMotion
-from SEZtoECEF import SEZtoECEF
+from TOPtoECEF import SEZtoECEF,ENZtoECEF
 from orbitalParams import orbitalParams
 from TwoBodySolver import SatPoints
 
 
 ################# DATA ######################
 ### Launch Site
-Lat = -28   # [deg] (phi)
+Lat = 28   # [deg] (phi)
 Lon = -80   # [deg] (theta)
 H = 0       # [km] Altitude to mean sea level
 
@@ -18,7 +18,7 @@ beta = 90      #[deg] Launch azimuth measured from north and clockwise (90 = eas
 
 hturn = 3700     # Altitude to start performing active controlled variation of flight path angle
 hg = 8200        # Altitude to start performing gravity turn
-Adotphi = -0.025 # Active controlled variation of flight path angle
+Adotphi = -0.026 # Active controlled variation of flight path angle
 d = 3.7        # Rocket diameter
 CD = 0.3       # Drag coefficient
 phi0 = 89.5    #Initial flight path angle
@@ -29,7 +29,7 @@ term = True    #Terminate integration on burnout (True) or coast after burnout (
 
 PL = 28*800  # Payload mass
 
-test = 61200
+test = 78000
 
 stages = {"stage1":{ 
             "m0": PL + (25600+395700) +  (3900+92670), #Payload + (First stage structural + First stage propellant) + (Second stage structural + Second stage propellant)
@@ -88,37 +88,60 @@ for i in stages:
     hComplete=np.concatenate((hComplete,sol.y[3]))
     massComplete=np.concatenate((massComplete,sol.y[4]))
 
-#Downrange decomposition
-rSouth = -xComplete*np.cos(np.deg2rad(beta))
-rEast = xComplete*np.sin(np.deg2rad(beta))
+if Lat < 0:
+  #Downrange decomposition
+  rSouth = -xComplete*np.cos(np.deg2rad(beta))
+  rEast = xComplete*np.sin(np.deg2rad(beta))
 
-#Speed vector
-sinPhi = np.sin(phiComplete)
-cosPhi = np.cos(phiComplete)
+  #Speed vector
+  sinPhi = np.sin(phiComplete)
+  cosPhi = np.cos(phiComplete)
 
-verticalSpeed = np.multiply(vComplete,sinPhi)
+  verticalSpeed = np.multiply(vComplete,sinPhi)
 
-horizontalSpeed = np.multiply(vComplete,cosPhi)
+  horizontalSpeed = np.multiply(vComplete,cosPhi)
 
-vSouth = -horizontalSpeed*np.cos(np.deg2rad(beta))
-vEast = horizontalSpeed*np.sin(np.deg2rad(beta))
+  vSouth = -horizontalSpeed*np.cos(np.deg2rad(beta))
+  vEast = horizontalSpeed*np.sin(np.deg2rad(beta))
 
 
-#SEZ to ECEF
-rSEZ = np.column_stack((rSouth,rEast,hComplete))
-vSEZ = np.column_stack((vSouth,vEast,verticalSpeed))
+  #SEZ to ECEF
+  rSEZ = np.column_stack((rSouth,rEast,hComplete))
+  vSEZ = np.column_stack((vSouth,vEast,verticalSpeed))
 
-rECEF,vECEF,rLaunchSite = SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ)
+  rECI,vECI,rLaunchSite,vLaunchSite = SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ)
+
+else:
+  rNorth = xComplete*np.cos(np.deg2rad(beta))
+  rEast = xComplete*np.sin(np.deg2rad(beta))
+
+  #Speed vector
+  sinPhi = np.sin(phiComplete)
+  cosPhi = np.cos(phiComplete)
+
+  verticalSpeed = np.multiply(vComplete,sinPhi)
+
+  horizontalSpeed = np.multiply(vComplete,cosPhi)
+
+  vNorth = horizontalSpeed*np.cos(np.deg2rad(beta))
+  vEast = horizontalSpeed*np.sin(np.deg2rad(beta))
+
+
+  #SEZ to ECI
+  rENZ = np.column_stack((rEast,rNorth,hComplete))
+  vENZ = np.column_stack((vEast,vNorth,verticalSpeed))
+
+  rECI,vECI,rLaunchSite,vLaunchSite = ENZtoECEF(Lat,Lon,H,rENZ,vENZ)
 
 #Propagation
-#print(massComplete[-1])
-#print(next(reversed(stages)))
+rogvog = np.concatenate((rECI[-1],vECI[-1]))
+time,pos,vel = SatPoints(500,step,rogvog,PL+2900+test,test-1200,981e3*.92,348,"Angular",20)
 
-rogvog = np.concatenate((rECEF[-1],vECEF[-1]))
-time,pos,vel = SatPoints(300,step,rogvog,PL+2900+test,test,981e3*.9,348)
+rECEF = rECI
+
 
 rECEFpos = np.concatenate((rECEF,pos))
-vECEFpos= np.concatenate((vECEF,vel))
+vECEFpos= np.concatenate((vECI-vLaunchSite,vel-vLaunchSite))
 timepos = np.concatenate((tComplete,time+tComplete[-1]))
 
 #Orbital parameters at final burnout
@@ -139,13 +162,21 @@ print(
 altitudeECEF = np.linalg.norm(rECEFpos,axis=1)-rLaunchSite
 velECEF = np.linalg.norm(vECEFpos,axis=1)
 
+vVerECI = []
+vHorECI = []
+for j in range(1,len(velECEF)):
+  vVerECI.append((altitudeECEF[j]-altitudeECEF[j-1])/(timepos[j]-timepos[j-1]))
+  vHorECI.append(velECEF[j]-vVerECI[j-1])
+
+timeVpos=timepos[1:]
+
 ################# Graphs ######################
 ## True
-tTrue = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 145, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360, 370, 380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 515]
+tTrue = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 145, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360, 370, 380, 390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500, 510, 515,3276]
 
-hTrue = [0, 0.1, 0.5, 1.4, 2.9, 5, 7.7, 11, 15, 20, 24.5, 30, 36.8, 44, 52.6, 58.9, 71, 79.6, 87.5, 95, 102, 108, 114, 120, 125, 129, 133, 137, 140, 143, 145, 147, 149, 150, 152, 152, 153, 153, 153, 153,152,152,151,150,149,149,148,147,146,145,144,143,143,143]
+hTrue = [0, 0.1, 0.5, 1.4, 2.9, 5, 7.7, 11, 15, 20, 24.5, 30, 36.8, 44, 52.6, 58.9, 71, 79.6, 87.5, 95, 102, 108, 114, 120, 125, 129, 133, 137, 140, 143, 145, 147, 149, 150, 152, 152, 153, 153, 153, 153,152,152,151,150,149,149,148,147,146,145,144,143,143,143,550]
 
-vTrue = [0.000, 0.028, 0.075, 0.133, 0.198, 0.275, 0.342, 0.439, 0.556, 0.708, 0.881, 1.083, 1.333, 1.611, 1.917, 2.167, 2.150, 2.192, 2.235, 2.287, 2.345, 2.406, 2.472, 2.543, 2.616, 2.694, 2.778, 2.867, 2.960, 3.058, 3.160, 3.268, 3.380, 3.498, 3.621, 3.751, 3.887, 4.028, 4.178, 4.335, 4.501, 4.677, 4.863, 5.059, 5.268, 5.489, 5.721, 5.971, 6.235, 6.513, 6.814, 7.181, 7.513, 7.581]
+vTrue = [0.000, 0.028, 0.075, 0.133, 0.198, 0.275, 0.342, 0.439, 0.556, 0.708, 0.881, 1.083, 1.333, 1.611, 1.917, 2.167, 2.150, 2.192, 2.235, 2.287, 2.345, 2.406, 2.472, 2.543, 2.616, 2.694, 2.778, 2.867, 2.960, 3.058, 3.160, 3.268, 3.380, 3.498, 3.621, 3.751, 3.887, 4.028, 4.178, 4.335, 4.501, 4.677, 4.863, 5.059, 5.268, 5.489, 5.721, 5.971, 6.235, 6.513, 6.814, 7.181, 7.513, 7.581,7.43]
 
 maxQ = [71,0.439]
 
@@ -208,7 +239,7 @@ tvsh.suptitle("Altitude [km] vs time [s]")
 ## Flight path angle [deg] vs time [s]
 phivst = plt.figure(num="Flight path angle [deg] vs time [s]")
 phivstp = phivst.add_subplot()
-phivstp.plot(tComplete,np.rad2deg(phiComplete))
+phivstp.plot(tComplete,np.rad2deg(phiComplete),label="SEZ")
 for i in tEvents:
     phivstp.plot([tEvents[i][0][0],tEvents[i][0][0]],[0,np.rad2deg(yEvents[i][0][0][1])],linestyle="dashed",label=i+" Burnout: %.2f" %np.rad2deg(yEvents[i][0][0][1]))
 phivstp.grid()

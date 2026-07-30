@@ -102,12 +102,9 @@ vEast = horizontalSpeed*np.sin(np.deg2rad(beta))
 rSEZ = np.column_stack((rSouth,rEast,hComplete))
 vSEZ = np.column_stack((vSouth,vEast,verticalSpeed))
 
-rECEF,vECEF,rLaunchSite = SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ)
+rECEF,vECEF,rLaunchSite,vLaunchSite = SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ)
 
 #Propagation
-#print(massComplete[-1])
-#print(next(reversed(stages)))
-
 rogvog = np.concatenate((rECEF[-1],vECEF[-1]))
 time,pos,vel = SatPoints(1000,step,rogvog,PL+700+test,test,2975*9.81*.88,317,"Angular",14)
 
