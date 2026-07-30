@@ -11,7 +11,7 @@ g0 = 9.81
 
 
 
-def SatPoints(seconds,steps,rogvog,mt,mp,Thrust,Isp,Modes,ang=0,OOF=True):
+def SatPoints(seconds,steps,rogvog,mt,mp,Thrust,Isp,mode,ang=0,OOF=True):
     tf = seconds #Tiempo [s] 
     pasos = steps
     mburnout = mt-mp
@@ -45,11 +45,6 @@ def SatPoints(seconds,steps,rogvog,mt,mp,Thrust,Isp,Modes,ang=0,OOF=True):
         else:
             T = Thrust #[N] Thrust
             dotm = -T/(Isp*g0) #Mass flow rate
-
-        if abs(pos-6378-580) <20:
-            mode = "Velocity"
-        else:
-            mode = Modes
 
 
         if mode == "Velocity":

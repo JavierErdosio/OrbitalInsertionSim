@@ -106,7 +106,7 @@ rECEF,vECEF,rLaunchSite,vLaunchSite = SEZtoECEF(Lat,Lon,H,rSEZ,vSEZ)
 
 #Propagation
 rogvog = np.concatenate((rECEF[-1],vECEF[-1]))
-time,pos,vel = SatPoints(1000,step,rogvog,PL+700+test,test,2975*9.81*.88,317,"Angular",14)
+time,pos,vel = SatPoints(1000,step,rogvog,PL+700+test,test,2975*9.81*.9,317,"Angular",10)
 
 rECEFpos = np.concatenate((rECEF,pos))
 vECEFpos= np.concatenate((vECEF,vel))
