@@ -135,7 +135,7 @@ else:
 
 #Propagation
 rogvog = np.concatenate((rECI[-1],vECI[-1]))
-time,pos,vel = SatPoints(500,step,rogvog,PL+2900+test,test-1200,981e3*.92,348,"Angular",20)
+time,pos,vel = SatPoints(500,step,rogvog,PL+2900+test,test-1200,981e3*.92,348,"Angular",18)
 
 rECEF = rECI
 
